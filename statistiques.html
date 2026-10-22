@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statistiques - Football et statistiques</title>
+    <link rel="stylesheet" href="dataviz_main.css">
+</head>
+
+<body>
+    <header>
+        <a class="nom" href="index.html">Karl</a>
+        <nav>
+            <a href="index.html">Accueil</a>
+            <a class="actif" aria-current="page" href="statistiques.html">Statistiques</a>
+            <a href="prediction.html">Conclusion</a>
+            <a href="methode.html">Sources</a>
+        </nav>
+    </header>
+
+    <main>
+        <h1>Les tirs cadrés et le résultat</h1>
+        <p>Les fichiers indiquent le nombre de tirs cadrés pour chaque équipe.
+            Regardons si les équipes qui cadrent davantage obtiennent de meilleurs résultats.</p>
+        <noscript>
+            <p>Active JavaScript pour afficher les graphiques. Les commentaires restent lisibles sans lui.</p>
+        </noscript>
+
+        <section class="graphiques">
+            <article class="graphique">
+                <h2>Les gagnants cadrent-ils davantage ?</h2>
+                <div class="chartContainer">
+                    <canvas id="graphTirs" role="img"
+                        aria-label="Tirs cadrés moyens par équipe : 5,67 en cas de victoire, 4,00 en cas de nul et 3,53 en cas de défaite."></canvas>
+                </div>
+                <p>Les équipes gagnantes réalisent environ 5,7 tirs cadrés par match,
+                    contre 3,5 pour les perdantes. Il s’agit de moyennes : chaque match peut être différent.</p>
+                <p><strong>Pourquoi des barres ?</strong> Elles permettent de comparer facilement trois catégories.</p>
+                <p class="source">Calculs sur les données <a href="https://football-data.co.uk/francem.php"
+                        target="_blank" rel="noopener">Football-Data</a>.
+                    Une observation par équipe et par match : 1 266 victoires, 824 nuls et 1 266 défaites.</p>
+            </article>
+
+            <article class="graphique">
+                <h2>Les tirs cadrés sont-ils liés à la victoire ?</h2>
+                <div class="chartContainer">
+                    <canvas id="graphEcarts" role="img"
+                        aria-label="Nuage de 1 678 matchs : écart de tirs cadrés et écart de buts, avec une couleur par résultat du match."></canvas>
+                </div>
+                <p>Chaque point représente un match. L’axe horizontal montre l’écart de tirs cadrés et l’axe vertical
+                    l’écart de buts, dans les deux cas « domicile moins extérieur ». La couleur indique une victoire à
+                    domicile, un nul ou une victoire à l’extérieur.</p>
+                <p><strong>Comment le lire ?</strong> À droite, l’équipe à domicile a cadré davantage ; au-dessus de
+                    zéro, elle a marqué plus de buts. Le nuage montre une association, mais ne prouve pas à lui seul
+                    que les tirs cadrés causent la victoire.</p>
+                <p class="source">Calculs sur les données <a href="https://football-data.co.uk/francem.php"
+                        target="_blank" rel="noopener">Football-Data</a>.
+                    Certains matchs ont les mêmes écarts : leurs points se superposent.
+                    Les infobulles sont désactivées pour ne pas afficher de listes répétées.</p>
+            </article>
+        </section>
+        <section class="graphiques">
+            <article class="graphique">
+                <h2>Combien de buts par match ?</h2>
+                <div class="chartContainer">
+                    <canvas id="graphButsSaison" role="img"
+                        aria-label="Nombre moyen de buts par match pour chaque saison."></canvas>
+                </div>
+                <p>Ce graphique compare le nombre moyen de buts marqués pendant un match selon la saison.</p>
+                <p><strong>À regarder :</strong> une barre plus haute signifie que les matchs ont été plus prolifiques
+                    en buts.</p>
+            </article>
+            <article class="graphique">
+                <h2>Les matchs gagnés ont-ils plus de buts ?</h2>
+                <div class="chartContainer">
+                    <canvas id="graphButsResultat" role="img"
+                        aria-label="Nombre moyen de buts par match selon le résultat final."></canvas>
+                </div>
+                <p>On compare le nombre moyen de buts dans les victoires à domicile, les nuls et les victoires à
+                    l’extérieur.</p>
+                <p><strong>À regarder :</strong> les matchs nuls ont généralement moins de buts que les matchs avec un
+                    vainqueur.</p>
+            </article>
+            <article class="graphique">
+                <h2>Combien de corners dans un match ?</h2>
+                <div class="chartContainer">
+                    <canvas id="graphCorners" role="img"
+                        aria-label="Nombre moyen de corners au total par match selon le résultat final."></canvas>
+                </div>
+                <p>Les corners des deux équipes sont additionnés pour obtenir un total par match, puis comparés selon le
+                    résultat.</p>
+                <p><strong>À regarder :</strong> les corners donnent une autre façon de décrire le rythme d’un match,
+                    sans garantir la victoire.</p>
+            </article>
+        </section>
+        <p><a href="prediction.html">Lire la conclusion →</a></p>
+    </main>
+
+    <footer>Projet de datavisualisation · Ligue 1 · Projet web</footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="donnees.js"></script>
+    <script>
+        // Graphique 3 : comparaison de trois moyennes.
+        const graphTirs = document.getElementById("graphTirs");
+        new Chart(graphTirs, {
+            type: "bar",
+            data: {
+                labels: resultatsEquipe,
+                datasets: [{
+                    label: "Tirs cadrés moyens par équipe",
+                    data: moyenneTirsCadres
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        // Graphique 4 : écart de tirs cadrés mis en relation avec le résultat du match.
+        const graphEcarts = document.getElementById("graphEcarts");
+        new Chart(graphEcarts, {
+            type: "scatter",
+            data: {
+                datasets: [
+                    {
+                        label: "Victoire à domicile",
+                        data: pointsMatchs.filter(point => point.y > 0),
+                        backgroundColor: "rgba(54, 162, 235, 0.5)",
+                        pointRadius: 3
+                    },
+                    {
+                        label: "Match nul",
+                        data: pointsMatchs.filter(point => point.y === 0),
+                        backgroundColor: "rgba(255, 159, 64, 0.5)",
+                        pointRadius: 3
+                    },
+                    {
+                        label: "Victoire à l’extérieur",
+                        data: pointsMatchs.filter(point => point.y < 0),
+                        backgroundColor: "rgba(255, 99, 132, 0.5)",
+                        pointRadius: 3
+                    }
+                ]
+            },
+            options: {
+                maintainAspectRatio: false,
+                // Évite une longue infobulle quand plusieurs points se superposent.
+                plugins: {
+                    tooltip: { enabled: false }
+                },
+                scales: {
+                    x: {
+                        title: { display: true, text: "Écart de tirs cadrés (dom. - ext.)" }
+                    },
+                    y: {
+                        title: { display: true, text: "Écart de buts (dom. - ext.)" }
+                    }
+                }
+            }
+        });
+
+        // Graphique 5 : moyenne de buts par saison.
+        new Chart(document.getElementById("graphButsSaison"), {
+            type: "bar",
+            data: {
+                labels: saisonsButs,
+                datasets: [{ label: "Buts moyens par match", data: moyenneButsSaison }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                scales: { y: { beginAtZero: true, title: { display: true, text: "Buts par match" } } }
+            }
+        });
+
+        // Graphique 6 : moyenne de buts selon le résultat.
+        new Chart(document.getElementById("graphButsResultat"), {
+            type: "bar",
+            data: {
+                labels: libellesResultats,
+                datasets: [{ label: "Buts moyens par match", data: moyenneButsParResultat }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                scales: { y: { beginAtZero: true, title: { display: true, text: "Buts par match" } } }
+            }
+        });
+
+        // Graphique 7 : corners moyens par match selon le résultat.
+        new Chart(document.getElementById("graphCorners"), {
+            type: "bar",
+            data: {
+                labels: libellesResultats,
+                datasets: [{ label: "Corners moyens par match", data: moyenneCornersParResultat }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                scales: { y: { beginAtZero: true, title: { display: true, text: "Corners par match" } } }
+            }
+        });
+
+    </script>
+</body>
+
+</html>

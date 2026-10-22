@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accueil - Football et statistiques</title>
+    <link rel="stylesheet" href="dataviz_main.css">
+</head>
+
+<body>
+    <header>
+        <a class="nom" href="index.html">Karl, Jihed , Antonio</a>
+        <nav>
+            <a class="actif" aria-current="page" href="index.html">Accueil</a>
+            <a href="statistiques.html">Statistiques</a>
+            <a href="prediction.html">Conclusion</a>
+            <a href="methode.html">Sources</a>
+        </nav>
+    </header>
+
+    <main>
+        <h1>Football : que nous disent les statistiques ?</h1>
+        <p>Quelles statistiques d’un match influencent le plus son résultat, et permettent-elles de le prédire ?</p>
+        <p>Nous étudions 1 678 matchs de Ligue 1 sur cinq saisons, de 2021-2022 à 2025-2026.</p>
+        <noscript>
+            <p>Active JavaScript pour afficher les graphiques. Les commentaires restent lisibles sans lui.</p>
+        </noscript>
+
+        <section class="graphiques">
+            <article class="graphique">
+                <h2>Qui gagne les matchs ?</h2>
+                <div class="chartContainer">
+                    <canvas id="graphResultats" role="img"
+                        aria-label="Résultats : 729 victoires à domicile, 412 nuls et 537 victoires à l’extérieur."></canvas>
+                </div>
+                <p>Les équipes à domicile gagnent 729 matchs, soit 43,4 % du total.
+                    On compte aussi 412 nuls (24,6 %) et 537 victoires à l’extérieur (32,0 %).</p>
+                <p><strong>Pourquoi un anneau ?</strong> Il montre la part de chaque résultat dans l’ensemble des
+                    matchs.</p>
+                <p class="source">Données : <a href="https://football-data.co.uk/francem.php" target="_blank"
+                        rel="noopener">Football-Data</a>.
+                    Survole une partie pour voir son effectif.</p>
+            </article>
+
+            <article class="graphique">
+                <h2>Tirs et victoires : domicile ou extérieur ?</h2>
+                <div class="chartContainer">
+                    <canvas id="graphSaisons" role="img"
+                        aria-label="Comparaison saison par saison des tirs par match et des taux de victoire à domicile et à l’extérieur."></canvas>
+                </div>
+                <p>Les lignes pleines montrent les tirs moyens par match ; les lignes en pointillés montrent le taux
+                    de victoire à domicile et à l’extérieur. Les matchs nuls ne comptent comme victoire pour aucune
+                    équipe.</p>
+                <p><strong>Comment lire le graphique ?</strong> L’axe de gauche indique les tirs par match et celui de
+                    droite les victoires en pourcentage. Les deux échelles permettent de comparer les évolutions
+                    saisonnières.</p>
+                <p class="source">Calculs sur les données <a href="https://football-data.co.uk/francem.php"
+                        target="_blank" rel="noopener">Football-Data</a>.
+                    Tirs : <a href="statistiques.html">données des matchs</a> ; taux calculés sur les résultats de
+                    chaque saison.</p>
+            </article>
+        </section>
+        <p><a href="statistiques.html">Continuer avec les tirs cadrés →</a></p>
+    </main>
+
+    <footer>Projet de datavisualisation · Ligue 1 · Projet Web</footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="donnees.js"></script>
+    <script>
+        // Graphique 1 : on choisit le canvas avec son id.
+        const graphResultats = document.getElementById("graphResultats");
+        new Chart(graphResultats, {
+            type: "doughnut",
+            data: {
+                labels: resultats,
+                datasets: [{
+                    label: "Nombre de matchs",
+                    data: nombreMatchs
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: "bottom" }
+                }
+            }
+        });
+
+        // Graphique 2 : tirs et taux de victoire, avec une échelle verticale par unité.
+        const graphSaisons = document.getElementById("graphSaisons");
+        new Chart(graphSaisons, {
+            type: "line",
+            data: {
+                labels: saisons,
+                datasets: [{
+                    label: "Tirs à domicile (par match)",
+                    data: tirsDomicileSaison,
+                    borderColor: "#36a2eb",
+                    backgroundColor: "rgba(54, 162, 235, 0.2)",
+                    yAxisID: "yTirs"
+                }, {
+                    label: "Tirs à l’extérieur (par match)",
+                    data: tirsExterieurSaison,
+                    borderColor: "#ff6384",
+                    backgroundColor: "rgba(255, 99, 132, 0.2)",
+                    yAxisID: "yTirs"
+                }, {
+                    label: "Victoire à domicile (%)",
+                    data: pourcentageDomicile,
+                    borderColor: "#36a2eb",
+                    backgroundColor: "rgba(54, 162, 235, 0.2)",
+                    borderDash: [6, 4],
+                    yAxisID: "yTaux"
+                }, {
+                    label: "Victoire à l’extérieur (%)",
+                    data: pourcentageExterieur,
+                    borderColor: "#ff6384",
+                    backgroundColor: "rgba(255, 99, 132, 0.2)",
+                    borderDash: [6, 4],
+                    yAxisID: "yTaux"
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                scales: {
+                    yTirs: { type: "linear", position: "left", min: 8, max: 16, title: { display: true, text: "Tirs par match" } },
+                    yTaux: { type: "linear", position: "right", beginAtZero: true, max: 60, title: { display: true, text: "Victoires (%)" }, ticks: { callback: value => value + "%" }, grid: { drawOnChartArea: false } }
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

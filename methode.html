@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sources - Football et statistiques</title>
+    <link rel="stylesheet" href="dataviz_main.css">
+</head>
+
+<body>
+    <header>
+        <a class="nom" href="index.html">Karl, Jihed , Antonio</a>
+        <nav>
+            <a href="index.html">Accueil</a>
+            <a href="statistiques.html">Statistiques</a>
+            <a href="prediction.html">Conclusion</a>
+            <a class="actif" aria-current="page" href="methode.html">Sources</a>
+        </nav>
+    </header>
+    <main>
+        <h1>Sources et préparation des données</h1>
+        <p>Les fichiers CSV sont diffusés par
+            <a href="https://football-data.co.uk/francem.php" target="_blank" rel="noopener">Football-Data</a>.
+            Le site compile des données provenant de plusieurs fournisseurs, indiqués dans son
+            <a href="https://www.football-data.co.uk/notes.txt" target="_blank" rel="noopener">dictionnaire des
+                données</a>.
+        </p>
+        <p>Nous avons conservé les matchs de Ligue 1 de cinq saisons complètes, soit 1 678 rencontres.
+            Les données ont été téléchargées le 22 octobre 2026.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th scope="col">Saison</th>
+                    <th scope="col">Matchs</th>
+                    <th scope="col">Fichier original</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>2021-2022</td>
+                    <td>380</td>
+                    <td><a href="https://football-data.co.uk/mmz4281/2122/F1.csv">CSV 2021-2022</a></td>
+                </tr>
+                <tr>
+                    <td>2022-2023</td>
+                    <td>380</td>
+                    <td><a href="https://football-data.co.uk/mmz4281/2223/F1.csv">CSV 2022-2023</a></td>
+                </tr>
+                <tr>
+                    <td>2023-2024</td>
+                    <td>306</td>
+                    <td><a href="https://football-data.co.uk/mmz4281/2324/F1.csv">CSV 2023-2024</a></td>
+                </tr>
+                <tr>
+                    <td>2024-2025</td>
+                    <td>306</td>
+                    <td><a href="https://football-data.co.uk/mmz4281/2425/F1.csv">CSV 2024-2025</a></td>
+                </tr>
+                <tr>
+                    <td>2025-2026</td>
+                    <td>306</td>
+                    <td><a href="https://football-data.co.uk/mmz4281/2526/F1.csv">CSV 2025-2026</a></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>méthodes de calcul</h2>
+        <ul>
+            <li><strong>Anneau :</strong> compter les victoires à domicile, les nuls et les victoires à l’extérieur.
+            </li>
+            <li><strong>Courbe :</strong> diviser les victoires à domicile par le nombre de matchs de la saison, puis
+                multiplier par 100.</li>
+            <li><strong>Barres :</strong> additionner les tirs cadrés des équipes ayant le même résultat, puis diviser
+                par leur nombre d’observations.</li>
+            <li><strong>Nuage de points :</strong> pour chaque match, calculer deux différences : tirs cadrés domicile
+                moins extérieur et buts domicile moins extérieur.</li>
+        </ul>
+        <p>Pour les barres, un match compte pour deux observations, une par équipe.
+            Un match nul ajoute donc deux observations dans la catégorie « Nul ».</p>
+
+
+
+        <p><a href="data/ligue1_matchs_2021_2026.csv" download>Télécharger les données complètes (CSV)</a></p>
+        <p><a href="lire-le-code.md" download>Télécharger l’explication du code</a></p>
+        <p><a href="index.html">Revenir aux graphiques →</a></p>
+    </main>
+    <footer>Projet de datavisualisation · Ligue 1 · Projet Web</footer>
+</body>
+
+</html>
