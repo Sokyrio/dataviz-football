@@ -18,7 +18,9 @@
 
 - `getElementById` récupère le canvas où le graphique sera dessiné.
 - `new Chart(...)` crée le graphique.
-- `type` choisit la forme : `bar`, `line`, `doughnut` ou `scatter`.
+- `type` choisit la forme : `bar`, `line`, `doughnut`, `scatter` ou `matrix` (heatmap).
+- La heatmap utilise le plugin `chartjs-chart-matrix`, chargé depuis le CDN comme Chart.js.
+- `indexAxis: "y"` transforme un graphique en barres verticales en barres horizontales.
 - `labels` contient les catégories affichées.
 - `data` contient les valeurs.
 - `beginAtZero: true` fait commencer l'axe vertical à zéro.

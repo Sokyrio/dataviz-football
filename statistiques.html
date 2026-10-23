@@ -46,18 +46,22 @@
                 <h2>Les tirs cadrés sont-ils liés à la victoire ?</h2>
                 <div class="chartContainer">
                     <canvas id="graphEcarts" role="img"
-                        aria-label="Nuage de 1 678 matchs : écart de tirs cadrés et écart de buts, avec une couleur par résultat du match."></canvas>
+                        aria-label="Carte de chaleur des 1 678 matchs : écart de tirs cadrés et écart de buts, la couleur d’une case indique le nombre de matchs."></canvas>
                 </div>
-                <p>Chaque point représente un match. L’axe horizontal montre l’écart de tirs cadrés et l’axe vertical
-                    l’écart de buts, dans les deux cas « domicile moins extérieur ». La couleur indique une victoire à
-                    domicile, un nul ou une victoire à l’extérieur.</p>
+                <p>Chaque case représente un couple d’écarts : à l’horizontal l’écart de tirs cadrés, à la
+                    verticale l’écart de buts, dans les deux cas « domicile moins extérieur ». Plus une case
+                    est foncée, plus le nombre de matchs ayant exactement ces écarts est grand.</p>
                 <p><strong>Comment le lire ?</strong> À droite, l’équipe à domicile a cadré davantage ; au-dessus de
-                    zéro, elle a marqué plus de buts. Le nuage montre une association, mais ne prouve pas à lui seul
-                    que les tirs cadrés causent la victoire.</p>
+                    zéro, elle a marqué plus de buts. Les cases foncées s’alignent le long d’une diagonale :
+                    l’association est visible, mais ne prouve pas que les tirs cadrés causent la victoire.</p>
+                <p>Moins de matchs
+                    <span style="display:inline-block;width:14px;height:14px;background:rgba(36,93,134,0.2);vertical-align:middle"></span>
+                    <span style="display:inline-block;width:14px;height:14px;background:rgba(36,93,134,0.6);vertical-align:middle"></span>
+                    <span style="display:inline-block;width:14px;height:14px;background:rgba(36,93,134,1);vertical-align:middle"></span>
+                    plus de matchs.</p>
                 <p class="source">Calculs sur les données <a href="https://football-data.co.uk/francem.php"
                         target="_blank" rel="noopener">Football-Data</a>.
-                    Certains matchs ont les mêmes écarts : leurs points se superposent.
-                    Les infobulles sont désactivées pour ne pas afficher de listes répétées.</p>
+                    Survole une case pour voir le nombre de matchs correspondant.</p>
             </article>
         </section>
         <section class="graphiques">
@@ -67,9 +71,11 @@
                     <canvas id="graphButsSaison" role="img"
                         aria-label="Nombre moyen de buts par match pour chaque saison."></canvas>
                 </div>
-                <p>Ce graphique compare le nombre moyen de buts marqués pendant un match selon la saison.</p>
-                <p><strong>À regarder :</strong> une barre plus haute signifie que les matchs ont été plus prolifiques
-                    en buts.</p>
+                <p>Ce graphique suit l’évolution du nombre moyen de buts marqués pendant un match, saison après
+                    saison.</p>
+                <p><strong>Pourquoi une courbe ?</strong> Les saisons se suivent dans le temps : une courbe
+                    relie les points et montre l’évolution d’une saison à l’autre. Ici la moyenne reste
+                    proche de 2,8 buts par match.</p>
             </article>
             <article class="graphique">
                 <h2>Les matchs gagnés ont-ils plus de buts ?</h2>
@@ -90,8 +96,8 @@
                 </div>
                 <p>Les corners des deux équipes sont additionnés pour obtenir un total par match, puis comparés selon le
                     résultat.</p>
-                <p><strong>À regarder :</strong> les corners donnent une autre façon de décrire le rythme d’un match,
-                    sans garantir la victoire.</p>
+                <p><strong>Pourquoi des barres horizontales ?</strong> Les noms des catégories sont longs :
+                    à l’horizontale ils restent lisibles, et la forme change des autres graphiques en barres.</p>
             </article>
         </section>
         <p><a href="prediction.html">Lire la conclusion →</a></p>
@@ -100,6 +106,7 @@
     <footer>Projet de datavisualisation · Ligue 1 · Projet web</footer>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix"></script>
     <script src="donnees.js"></script>
     <script>
         // Graphique 3 : comparaison de trois moyennes.
@@ -110,7 +117,9 @@
                 labels: resultatsEquipe,
                 datasets: [{
                     label: "Tirs cadrés moyens par équipe",
-                    data: moyenneTirsCadres
+                    data: moyenneTirsCadres,
+                    // Une couleur par catégorie de résultat.
+                    backgroundColor: ["#36a2eb", "#ffce56", "#ff6384"]
                 }]
             },
             options: {
@@ -121,59 +130,115 @@
             }
         });
 
-        // Graphique 4 : écart de tirs cadrés mis en relation avec le résultat du match.
-        const graphEcarts = document.getElementById("graphEcarts");
-        new Chart(graphEcarts, {
-            type: "scatter",
+        // Graphique 4 : carte de chaleur (heatmap) des écarts.
+        // Beaucoup de matchs ont exactement les mêmes écarts : on compte les
+        // matchs pour chaque couple (écart de tirs, écart de buts), puis la
+        // couleur d'une case montre ce nombre.
+        // Le type "matrix" vient du plugin chartjs-chart-matrix, chargé
+        // depuis le CDN comme Chart.js.
+        const compteur = new Map();
+        pointsMatchs.forEach(function (point) {
+            const cle = point.x + "," + point.y;
+            compteur.set(cle, (compteur.get(cle) || 0) + 1);
+        });
+        const casesHeatmap = [];
+        compteur.forEach(function (nombre, cle) {
+            const coordonnees = cle.split(",");
+            casesHeatmap.push({
+                x: Number(coordonnees[0]),
+                y: Number(coordonnees[1]),
+                v: nombre
+            });
+        });
+        const nombreMax = Math.max.apply(null, casesHeatmap.map(function (c) { return c.v; }));
+
+        // On calcule les écarts les plus grands et les plus petits :
+        // le graphique s'adapte tout seul si les données changent.
+        const xMin = Math.min.apply(null, pointsMatchs.map(function (p) { return p.x; }));
+        const xMax = Math.max.apply(null, pointsMatchs.map(function (p) { return p.x; }));
+        const yMin = Math.min.apply(null, pointsMatchs.map(function (p) { return p.y; }));
+        const yMax = Math.max.apply(null, pointsMatchs.map(function (p) { return p.y; }));
+        const nbColonnes = xMax - xMin + 1;
+        const nbLignes = yMax - yMin + 1;
+
+        new Chart(document.getElementById("graphEcarts"), {
+            type: "matrix",
             data: {
-                datasets: [
-                    {
-                        label: "Victoire à domicile",
-                        data: pointsMatchs.filter(point => point.y > 0),
-                        backgroundColor: "rgba(54, 162, 235, 0.5)",
-                        pointRadius: 3
+                datasets: [{
+                    label: "Nombre de matchs",
+                    data: casesHeatmap,
+                    backgroundColor: function (context) {
+                        const valeur = context.dataset.data[context.dataIndex].v;
+                        const opacite = 0.15 + 0.85 * (valeur / nombreMax);
+                        return "rgba(36, 93, 134, " + opacite.toFixed(2) + ")";
                     },
-                    {
-                        label: "Match nul",
-                        data: pointsMatchs.filter(point => point.y === 0),
-                        backgroundColor: "rgba(255, 159, 64, 0.5)",
-                        pointRadius: 3
+                    borderColor: "#ffffff",
+                    borderWidth: 1,
+                    // Taille d'une case : la largeur du graphique divisée par
+                    // le nombre d'écarts de tirs, la hauteur par le nombre
+                    // d'écarts de buts. Les cases remplissent exactement la zone.
+                    width: function (context) {
+                        const zone = context.chart.chartArea;
+                        return zone ? zone.width / nbColonnes : 10;
                     },
-                    {
-                        label: "Victoire à l’extérieur",
-                        data: pointsMatchs.filter(point => point.y < 0),
-                        backgroundColor: "rgba(255, 99, 132, 0.5)",
-                        pointRadius: 3
+                    height: function (context) {
+                        const zone = context.chart.chartArea;
+                        return zone ? zone.height / nbLignes : 10;
                     }
-                ]
+                }]
             },
             options: {
                 maintainAspectRatio: false,
-                // Évite une longue infobulle quand plusieurs points se superposent.
                 plugins: {
-                    tooltip: { enabled: false }
+                    legend: { display: false },
+                    // Au survol d'une case, on affiche son nombre de matchs.
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return context.raw.v + " matchs";
+                            }
+                        }
+                    }
                 },
                 scales: {
+                    // Les bornes vont d'une demi-unité au-delà des extrêmes :
+                    // chaque case est centrée sur un écart entier.
                     x: {
-                        title: { display: true, text: "Écart de tirs cadrés (dom. - ext.)" }
+                        min: xMin - 0.5, max: xMax + 0.5, offset: false,
+                        title: { display: true, text: "Écart de tirs cadrés (dom. - ext.)" },
+                        grid: { display: false },
+                        ticks: { stepSize: 4 }
                     },
                     y: {
-                        title: { display: true, text: "Écart de buts (dom. - ext.)" }
+                        min: yMin - 0.5, max: yMax + 0.5, offset: false,
+                        // Le plugin matrix inverse l'axe vertical par défaut :
+                        // on le remet dans le bon sens (écarts positifs en haut).
+                        reverse: false,
+                        title: { display: true, text: "Écart de buts (dom. - ext.)" },
+                        grid: { display: false },
+                        ticks: { stepSize: 2 }
                     }
                 }
             }
         });
 
-        // Graphique 5 : moyenne de buts par saison.
+        // Graphique 5 : moyenne de buts par saison, en courbe (les saisons se suivent).
         new Chart(document.getElementById("graphButsSaison"), {
-            type: "bar",
+            type: "line",
             data: {
                 labels: saisonsButs,
                 datasets: [{ label: "Buts moyens par match", data: moyenneButsSaison }]
             },
             options: {
                 maintainAspectRatio: false,
-                scales: { y: { beginAtZero: true, title: { display: true, text: "Buts par match" } } }
+                scales: {
+                    y: {
+                        min: 1,
+                        max: 4,
+                        ticks: { stepSize: 1 },
+                        title: { display: true, text: "Buts par match" }
+                    }
+                }
             }
         });
 
@@ -182,7 +247,7 @@
             type: "bar",
             data: {
                 labels: libellesResultats,
-                datasets: [{ label: "Buts moyens par match", data: moyenneButsParResultat }]
+                datasets: [{ label: "Buts moyens par match", data: moyenneButsParResultat, backgroundColor: ["#36a2eb", "#ffce56", "#ff6384"] }]
             },
             options: {
                 maintainAspectRatio: false,
@@ -190,16 +255,17 @@
             }
         });
 
-        // Graphique 7 : corners moyens par match selon le résultat.
+        // Graphique 7 : corners moyens par match selon le résultat, en barres horizontales.
         new Chart(document.getElementById("graphCorners"), {
             type: "bar",
             data: {
                 labels: libellesResultats,
-                datasets: [{ label: "Corners moyens par match", data: moyenneCornersParResultat }]
+                datasets: [{ label: "Corners moyens par match", data: moyenneCornersParResultat, backgroundColor: ["#36a2eb", "#ffce56", "#ff6384"] }]
             },
             options: {
+                indexAxis: "y",
                 maintainAspectRatio: false,
-                scales: { y: { beginAtZero: true, title: { display: true, text: "Corners par match" } } }
+                scales: { x: { beginAtZero: true, title: { display: true, text: "Corners par match" } } }
             }
         });
 
