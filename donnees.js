@@ -1,7 +1,3 @@
-// Données réelles préparées à partir du CSV de Ligue 1.
-// Ce fichier contient des listes, pas de calculs ni de modèle.
-// Source : https://football-data.co.uk/francem.php
-
 const resultats = ["Domicile", "Nul", "Extérieur"];
 const nombreMatchs = [729, 412, 537];
 
@@ -11,9 +7,6 @@ const pourcentageExterieur = [30.53, 32.89, 34.31, 33.01, 29.41];
 
 const resultatsEquipe = ["Victoire", "Nul", "Défaite"];
 const moyenneTirsCadres = [5.67, 4.0, 3.53];
-
-// Un point par match. x = écart de tirs cadrés ; y = écart de buts.
-// Les deux écarts sont calculés : domicile moins extérieur.
 const pointsMatchs = [
     {"x": 2, "y": 0},
     {"x": -4, "y": 0},
@@ -1694,8 +1687,6 @@ const pointsMatchs = [
     {"x": 7, "y": 1},
     {"x": -1, "y": 1}
 ];
-
-// Graphiques supplémentaires calculés à partir du fichier CSV.
 const saisonsButs = ["2021-2022", "2022-2023", "2023-2024", "2024-2025", "2025-2026"];
 const moyenneButsSaison = [2.81, 2.81, 2.7, 2.98, 2.82];
 const moyenneButsParResultat = [3.12, 2.04, 3.02];
