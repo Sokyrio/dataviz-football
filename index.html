@@ -67,66 +67,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="donnees.js"></script>
-    <script>
-        const graphResultats = document.getElementById("graphResultats");
-        new Chart(graphResultats, {
-            type: "doughnut",
-            data: {
-                labels: resultats,
-                datasets: [{
-                    label: "Nombre de matchs",
-                    data: nombreMatchs
-                }]
-            },
-            options: {
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: "bottom" }
-                }
-            }
-        });
-        const graphSaisons = document.getElementById("graphSaisons");
-        new Chart(graphSaisons, {
-            type: "line",
-            data: {
-                labels: saisons,
-                datasets: [{
-                    label: "Tirs à domicile (par match)",
-                    data: tirsDomicileSaison,
-                    borderColor: "#36a2eb",
-                    backgroundColor: "rgba(54, 162, 235, 0.2)",
-                    yAxisID: "yTirs"
-                }, {
-                    label: "Tirs à l’extérieur (par match)",
-                    data: tirsExterieurSaison,
-                    borderColor: "#ff6384",
-                    backgroundColor: "rgba(255, 99, 132, 0.2)",
-                    yAxisID: "yTirs"
-                }, {
-                    label: "Victoire à domicile (%)",
-                    data: pourcentageDomicile,
-                    borderColor: "#36a2eb",
-                    backgroundColor: "rgba(54, 162, 235, 0.2)",
-                    borderDash: [6, 4],
-                    yAxisID: "yTaux"
-                }, {
-                    label: "Victoire à l’extérieur (%)",
-                    data: pourcentageExterieur,
-                    borderColor: "#ff6384",
-                    backgroundColor: "rgba(255, 99, 132, 0.2)",
-                    borderDash: [6, 4],
-                    yAxisID: "yTaux"
-                }]
-            },
-            options: {
-                maintainAspectRatio: false,
-                scales: {
-                    yTirs: { type: "linear", position: "left", min: 8, max: 16, title: { display: true, text: "Tirs par match" } },
-                    yTaux: { type: "linear", position: "right", beginAtZero: true, max: 60, title: { display: true, text: "Victoires (%)" }, ticks: { callback: value => value + "%" }, grid: { drawOnChartArea: false } }
-                }
-            }
-        });
-    </script>
+    <script src="graphiques.js"></script>
 </body>
 
 </html>
