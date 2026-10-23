@@ -31,8 +31,8 @@
             <article class="graphique">
                 <h2>Les gagnants cadrent-ils davantage ?</h2>
                 <div class="chartContainer">
-                    <canvas id="graphTirs" role="img"
-                        aria-label="Tirs cadrés moyens par équipe : 5,67 en cas de victoire, 4,00 en cas de nul et 3,53 en cas de défaite."></canvas>
+                    <div id="graphTirs" role="img"
+                        aria-label="Tirs cadrés moyens par équipe : 5,67 en cas de victoire, 4,00 en cas de nul et 3,53 en cas de défaite."></div>
                 </div>
                 <p>Les équipes gagnantes réalisent environ 5,7 tirs cadrés par match,
                     contre 3,5 pour les perdantes. Il s’agit de moyennes : chaque match peut être différent.</p>
@@ -45,8 +45,8 @@
             <article class="graphique">
                 <h2>Les tirs cadrés sont-ils liés à la victoire ?</h2>
                 <div class="chartContainer">
-                    <canvas id="graphEcarts" role="img"
-                        aria-label="Carte de chaleur des 1 678 matchs : écart de tirs cadrés et écart de buts, la couleur d’une case indique le nombre de matchs."></canvas>
+                    <div id="graphEcarts" role="img"
+                        aria-label="Carte de chaleur des 1 678 matchs : écart de tirs cadrés et écart de buts, la couleur d’une case indique le nombre de matchs."></div>
                 </div>
                 <p>Chaque case représente un couple d’écarts : à l’horizontal l’écart de tirs cadrés, à la
                     verticale l’écart de buts, dans les deux cas « domicile moins extérieur ». Plus une case
@@ -68,8 +68,8 @@
             <article class="graphique">
                 <h2>Combien de buts par match ?</h2>
                 <div class="chartContainer">
-                    <canvas id="graphButsSaison" role="img"
-                        aria-label="Nombre moyen de buts par match pour chaque saison."></canvas>
+                    <div id="graphButsSaison" role="img"
+                        aria-label="Nombre moyen de buts par match pour chaque saison."></div>
                 </div>
                 <p>Ce graphique suit l’évolution du nombre moyen de buts marqués pendant un match, saison après
                     saison.</p>
@@ -80,8 +80,8 @@
             <article class="graphique">
                 <h2>Les matchs gagnés ont-ils plus de buts ?</h2>
                 <div class="chartContainer">
-                    <canvas id="graphButsResultat" role="img"
-                        aria-label="Nombre moyen de buts par match selon le résultat final."></canvas>
+                    <div id="graphButsResultat" role="img"
+                        aria-label="Nombre moyen de buts par match selon le résultat final."></div>
                 </div>
                 <p>On compare le nombre moyen de buts dans les victoires à domicile, les nuls et les victoires à
                     l’extérieur.</p>
@@ -91,8 +91,8 @@
             <article class="graphique">
                 <h2>Combien de corners dans un match ?</h2>
                 <div class="chartContainer">
-                    <canvas id="graphCorners" role="img"
-                        aria-label="Nombre moyen de corners au total par match selon le résultat final."></canvas>
+                    <div id="graphCorners" role="img"
+                        aria-label="Nombre moyen de corners au total par match selon le résultat final."></div>
                 </div>
                 <p>Les corners des deux équipes sont additionnés pour obtenir un total par match, puis comparés selon le
                     résultat.</p>
@@ -105,170 +105,32 @@
 
     <footer>Projet de datavisualisation · Ligue 1 · Projet web</footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
     <script src="donnees.js"></script>
     <script>
-        // Graphique 3 : comparaison de trois moyennes.
-        const graphTirs = document.getElementById("graphTirs");
-        new Chart(graphTirs, {
-            type: "bar",
-            data: {
-                labels: resultatsEquipe,
-                datasets: [{
-                    label: "Tirs cadrés moyens par équipe",
-                    data: moyenneTirsCadres,
-                    // Une couleur par catégorie de résultat.
-                    backgroundColor: ["#36a2eb", "#ffce56", "#ff6384"]
-                }]
-            },
-            options: {
-                maintainAspectRatio: false,
-                scales: {
-                    y: { beginAtZero: true }
-                }
-            }
-        });
+        const couleurs = ["#36a2eb", "#ffce56", "#ff6384"];
+        const graphTirs = echarts.init(document.getElementById("graphTirs"));
+        graphTirs.setOption({ tooltip: { trigger: "axis", axisPointer: { type: "shadow" } }, grid: { left: 55, right: 20, top: 25, bottom: 40 }, xAxis: { type: "category", data: resultatsEquipe }, yAxis: { type: "value", min: 0, name: "Tirs cadrés" }, series: [{ name: "Tirs cadrés moyens par équipe", type: "bar", data: moyenneTirsCadres, itemStyle: { color: p => couleurs[p.dataIndex] } }] });
 
-        // Graphique 4 : carte de chaleur (heatmap) des écarts.
-        // Beaucoup de matchs ont exactement les mêmes écarts : on compte les
-        // matchs pour chaque couple (écart de tirs, écart de buts), puis la
-        // couleur d'une case montre ce nombre.
-        // Le type "matrix" vient du plugin chartjs-chart-matrix, chargé
-        // depuis le CDN comme Chart.js.
         const compteur = new Map();
-        pointsMatchs.forEach(function (point) {
-            const cle = point.x + "," + point.y;
-            compteur.set(cle, (compteur.get(cle) || 0) + 1);
-        });
-        const casesHeatmap = [];
-        compteur.forEach(function (nombre, cle) {
-            const coordonnees = cle.split(",");
-            casesHeatmap.push({
-                x: Number(coordonnees[0]),
-                y: Number(coordonnees[1]),
-                v: nombre
-            });
-        });
-        const nombreMax = Math.max.apply(null, casesHeatmap.map(function (c) { return c.v; }));
+        pointsMatchs.forEach(p => { const cle = p.x + "," + p.y; compteur.set(cle, (compteur.get(cle) || 0) + 1); });
+        const casesHeatmap = Array.from(compteur, ([cle, valeur]) => { const [x, y] = cle.split(",").map(Number); return [x, y, valeur]; });
+        const xMin = Math.min(...pointsMatchs.map(p => p.x)), xMax = Math.max(...pointsMatchs.map(p => p.x));
+        const yMin = Math.min(...pointsMatchs.map(p => p.y)), yMax = Math.max(...pointsMatchs.map(p => p.y));
+        const axeX = Array.from({ length: xMax - xMin + 1 }, (_, i) => String(xMin + i));
+        const axeY = Array.from({ length: yMax - yMin + 1 }, (_, i) => String(yMin + i));
+        const nombreMax = Math.max(...casesHeatmap.map(c => c[2]));
+        const graphEcarts = echarts.init(document.getElementById("graphEcarts"));
+        graphEcarts.setOption({ tooltip: { position: "top", formatter: p => `Écart de tirs : ${p.value[0]}<br>Écart de buts : ${p.value[1]}<br>${p.value[2]} matchs` }, grid: { left: 65, right: 85, top: 20, bottom: 55 }, xAxis: { type: "category", data: axeX, name: "Écart de tirs cadrés (dom. - ext.)", nameLocation: "middle", nameGap: 35, axisLabel: { interval: 3 } }, yAxis: { type: "category", data: axeY, name: "Écart de buts (dom. - ext.)", nameLocation: "middle", nameGap: 45 }, visualMap: { min: 1, max: nombreMax, calculable: false, orient: "vertical", right: 0, top: "middle", inRange: { color: ["#e8f1f7", "#245d86"] } }, series: [{ name: "Nombre de matchs", type: "heatmap", data: casesHeatmap, itemStyle: { borderColor: "#fff", borderWidth: 1 } }] });
 
-        // On calcule les écarts les plus grands et les plus petits :
-        // le graphique s'adapte tout seul si les données changent.
-        const xMin = Math.min.apply(null, pointsMatchs.map(function (p) { return p.x; }));
-        const xMax = Math.max.apply(null, pointsMatchs.map(function (p) { return p.x; }));
-        const yMin = Math.min.apply(null, pointsMatchs.map(function (p) { return p.y; }));
-        const yMax = Math.max.apply(null, pointsMatchs.map(function (p) { return p.y; }));
-        const nbColonnes = xMax - xMin + 1;
-        const nbLignes = yMax - yMin + 1;
-
-        new Chart(document.getElementById("graphEcarts"), {
-            type: "matrix",
-            data: {
-                datasets: [{
-                    label: "Nombre de matchs",
-                    data: casesHeatmap,
-                    backgroundColor: function (context) {
-                        const valeur = context.dataset.data[context.dataIndex].v;
-                        const opacite = 0.15 + 0.85 * (valeur / nombreMax);
-                        return "rgba(36, 93, 134, " + opacite.toFixed(2) + ")";
-                    },
-                    borderColor: "#ffffff",
-                    borderWidth: 1,
-                    // Taille d'une case : la largeur du graphique divisée par
-                    // le nombre d'écarts de tirs, la hauteur par le nombre
-                    // d'écarts de buts. Les cases remplissent exactement la zone.
-                    width: function (context) {
-                        const zone = context.chart.chartArea;
-                        return zone ? zone.width / nbColonnes : 10;
-                    },
-                    height: function (context) {
-                        const zone = context.chart.chartArea;
-                        return zone ? zone.height / nbLignes : 10;
-                    }
-                }]
-            },
-            options: {
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    // Au survol d'une case, on affiche son nombre de matchs.
-                    tooltip: {
-                        callbacks: {
-                            label: function (context) {
-                                return context.raw.v + " matchs";
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    // Les bornes vont d'une demi-unité au-delà des extrêmes :
-                    // chaque case est centrée sur un écart entier.
-                    x: {
-                        min: xMin - 0.5, max: xMax + 0.5, offset: false,
-                        title: { display: true, text: "Écart de tirs cadrés (dom. - ext.)" },
-                        grid: { display: false },
-                        ticks: { stepSize: 4 }
-                    },
-                    y: {
-                        min: yMin - 0.5, max: yMax + 0.5, offset: false,
-                        // Le plugin matrix inverse l'axe vertical par défaut :
-                        // on le remet dans le bon sens (écarts positifs en haut).
-                        reverse: false,
-                        title: { display: true, text: "Écart de buts (dom. - ext.)" },
-                        grid: { display: false },
-                        ticks: { stepSize: 2 }
-                    }
-                }
-            }
-        });
-
-        // Graphique 5 : moyenne de buts par saison, en courbe (les saisons se suivent).
-        new Chart(document.getElementById("graphButsSaison"), {
-            type: "line",
-            data: {
-                labels: saisonsButs,
-                datasets: [{ label: "Buts moyens par match", data: moyenneButsSaison }]
-            },
-            options: {
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        min: 1,
-                        max: 4,
-                        ticks: { stepSize: 1 },
-                        title: { display: true, text: "Buts par match" }
-                    }
-                }
-            }
-        });
-
-        // Graphique 6 : moyenne de buts selon le résultat.
-        new Chart(document.getElementById("graphButsResultat"), {
-            type: "bar",
-            data: {
-                labels: libellesResultats,
-                datasets: [{ label: "Buts moyens par match", data: moyenneButsParResultat, backgroundColor: ["#36a2eb", "#ffce56", "#ff6384"] }]
-            },
-            options: {
-                maintainAspectRatio: false,
-                scales: { y: { beginAtZero: true, title: { display: true, text: "Buts par match" } } }
-            }
-        });
-
-        // Graphique 7 : corners moyens par match selon le résultat, en barres horizontales.
-        new Chart(document.getElementById("graphCorners"), {
-            type: "bar",
-            data: {
-                labels: libellesResultats,
-                datasets: [{ label: "Corners moyens par match", data: moyenneCornersParResultat, backgroundColor: ["#36a2eb", "#ffce56", "#ff6384"] }]
-            },
-            options: {
-                indexAxis: "y",
-                maintainAspectRatio: false,
-                scales: { x: { beginAtZero: true, title: { display: true, text: "Corners par match" } } }
-            }
-        });
-
+        const graphButsSaison = echarts.init(document.getElementById("graphButsSaison"));
+        graphButsSaison.setOption({ tooltip: { trigger: "axis" }, grid: { left: 55, right: 20, top: 25, bottom: 45 }, xAxis: { type: "category", data: saisonsButs }, yAxis: { type: "value", min: 1, max: 4, interval: 1, name: "Buts par match" }, series: [{ name: "Buts moyens par match", type: "line", data: moyenneButsSaison, itemStyle: { color: "#245d86" }, lineStyle: { color: "#245d86", width: 3 }, areaStyle: { color: "rgba(36,93,134,0.12)" } }] });
+        const graphButsResultat = echarts.init(document.getElementById("graphButsResultat"));
+        graphButsResultat.setOption({ tooltip: { trigger: "axis", axisPointer: { type: "shadow" } }, grid: { left: 55, right: 20, top: 25, bottom: 40 }, xAxis: { type: "category", data: libellesResultats }, yAxis: { type: "value", min: 0, name: "Buts par match" }, series: [{ name: "Buts moyens par match", type: "bar", data: moyenneButsParResultat, itemStyle: { color: p => couleurs[p.dataIndex] } }] });
+        const graphCorners = echarts.init(document.getElementById("graphCorners"));
+        graphCorners.setOption({ tooltip: { trigger: "axis", axisPointer: { type: "shadow" } }, grid: { left: 115, right: 25, top: 25, bottom: 45 }, xAxis: { type: "value", min: 0, name: "Corners par match" }, yAxis: { type: "category", data: libellesResultats }, series: [{ name: "Corners moyens par match", type: "bar", data: moyenneCornersParResultat, itemStyle: { color: p => couleurs[p.dataIndex] } }] });
+        const graphiques = [graphTirs, graphEcarts, graphButsSaison, graphButsResultat, graphCorners];
+        window.addEventListener("resize", () => graphiques.forEach(g => g.resize()));
     </script>
 </body>
 

@@ -4,7 +4,7 @@ Petit site statique de datavisualisation des matchs de Ligue 1 entre 2021-2022 e
 
 ## Voir le site
 
-Ouvrir `index.html` dans un navigateur. Une connexion Internet est nécessaire pour charger Chart.js depuis son CDN.
+Ouvrir `index.html` dans un navigateur. Une connexion Internet est nécessaire pour charger Apache ECharts depuis son CDN.
 
 Le site peut aussi être publié tel quel avec GitHub Pages, sans étape de compilation.
 

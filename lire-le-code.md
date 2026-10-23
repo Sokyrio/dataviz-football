@@ -3,7 +3,7 @@
 ## Lancer le site
 1. Décompresser le dossier.
 2. Ouvrir `index.html` dans ton navigateur.
-3. Une connexion Internet est nécessaire pour charger Chart.js depuis le CDN.
+3. Une connexion Internet est nécessaire pour charger Apache ECharts depuis le CDN.
 
 ## Les fichiers importants
 - `index.html` : les graphiques sur les résultats et les saisons.
@@ -16,10 +16,10 @@
 
 ```
 
-- `getElementById` récupère le canvas où le graphique sera dessiné.
+- `getElementById` récupère le conteneur où le graphique sera dessiné.
 - `new Chart(...)` crée le graphique.
-- `type` choisit la forme : `bar`, `line`, `doughnut`, `scatter` ou `matrix` (heatmap).
-- La heatmap utilise le plugin `chartjs-chart-matrix`, chargé depuis le CDN comme Chart.js.
+- `type` choisit la forme : `bar`, `line`, `pie` (anneau) ou `heatmap`.
+- La heatmap utilise la série heatmap intégrée à ECharts.
 - `indexAxis: "y"` transforme un graphique en barres verticales en barres horizontales.
 - `labels` contient les catégories affichées.
 - `data` contient les valeurs.
