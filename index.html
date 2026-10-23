@@ -3,7 +3,6 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Accueil - Football et statistiques</title>
     <link rel="stylesheet" href="dataviz_main.css">
 </head>
@@ -31,8 +30,8 @@
             <article class="graphique">
                 <h2>Qui gagne les matchs ?</h2>
                 <div class="chartContainer">
-                    <div id="graphResultats" role="img"
-                        aria-label="Résultats : 729 victoires à domicile, 412 nuls et 537 victoires à l’extérieur."></div>
+                    <canvas id="graphResultats" role="img"
+                        aria-label="Résultats : 729 victoires à domicile, 412 nuls et 537 victoires à l’extérieur."></canvas>
                 </div>
                 <p>Les équipes à domicile gagnent 729 matchs, soit 43,4 % du total.
                     On compte aussi 412 nuls (24,6 %) et 537 victoires à l’extérieur (32,0 %).</p>
@@ -46,8 +45,8 @@
             <article class="graphique">
                 <h2>Tirs et victoires : domicile ou extérieur ?</h2>
                 <div class="chartContainer">
-                    <div id="graphSaisons" role="img"
-                        aria-label="Comparaison saison par saison des tirs par match et des taux de victoire à domicile et à l’extérieur."></div>
+                    <canvas id="graphSaisons" role="img"
+                        aria-label="Comparaison saison par saison des tirs par match et des taux de victoire à domicile et à l’extérieur."></canvas>
                 </div>
                 <p>Les lignes pleines montrent les tirs moyens par match ; les lignes en pointillés montrent le taux
                     de victoire à domicile et à l’extérieur. Les matchs nuls ne comptent comme victoire pour aucune
@@ -66,19 +65,67 @@
 
     <footer>Projet de datavisualisation · Ligue 1 · Projet Web</footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="donnees.js"></script>
     <script>
-        const chartResultats = echarts.init(document.getElementById("graphResultats"));
-        chartResultats.setOption({ tooltip: { trigger: "item", formatter: "{b} : {c} matchs ({d}%)" }, legend: { bottom: 0 }, series: [{ type: "pie", radius: ["42%", "70%"], center: ["50%", "46%"], data: resultats.map((name, i) => ({ name, value: nombreMatchs[i] })), itemStyle: { borderColor: "#fff", borderWidth: 2 } }] });
-        const chartSaisons = echarts.init(document.getElementById("graphSaisons"));
-        chartSaisons.setOption({ tooltip: { trigger: "axis" }, legend: { bottom: 0, type: "scroll" }, grid: { left: 55, right: 55, top: 28, bottom: 75 }, xAxis: { type: "category", data: saisons }, yAxis: [{ type: "value", min: 8, max: 16, name: "Tirs par match" }, { type: "value", min: 0, max: 60, name: "Victoires (%)", axisLabel: { formatter: "{value}%" } }], series: [
-            { name: "Tirs à domicile (par match)", type: "line", data: tirsDomicileSaison, itemStyle: { color: "#36a2eb" } },
-            { name: "Tirs à l’extérieur (par match)", type: "line", data: tirsExterieurSaison, itemStyle: { color: "#ff6384" } },
-            { name: "Victoire à domicile (%)", type: "line", yAxisIndex: 1, data: pourcentageDomicile, lineStyle: { type: "dashed", color: "#36a2eb" }, itemStyle: { color: "#36a2eb" } },
-            { name: "Victoire à l’extérieur (%)", type: "line", yAxisIndex: 1, data: pourcentageExterieur, lineStyle: { type: "dashed", color: "#ff6384" }, itemStyle: { color: "#ff6384" } }
-        ] });
-        window.addEventListener("resize", () => { chartResultats.resize(); chartSaisons.resize(); });
+        const graphResultats = document.getElementById("graphResultats");
+        new Chart(graphResultats, {
+            type: "doughnut",
+            data: {
+                labels: resultats,
+                datasets: [{
+                    label: "Nombre de matchs",
+                    data: nombreMatchs
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: "bottom" }
+                }
+            }
+        });
+        const graphSaisons = document.getElementById("graphSaisons");
+        new Chart(graphSaisons, {
+            type: "line",
+            data: {
+                labels: saisons,
+                datasets: [{
+                    label: "Tirs à domicile (par match)",
+                    data: tirsDomicileSaison,
+                    borderColor: "#36a2eb",
+                    backgroundColor: "rgba(54, 162, 235, 0.2)",
+                    yAxisID: "yTirs"
+                }, {
+                    label: "Tirs à l’extérieur (par match)",
+                    data: tirsExterieurSaison,
+                    borderColor: "#ff6384",
+                    backgroundColor: "rgba(255, 99, 132, 0.2)",
+                    yAxisID: "yTirs"
+                }, {
+                    label: "Victoire à domicile (%)",
+                    data: pourcentageDomicile,
+                    borderColor: "#36a2eb",
+                    backgroundColor: "rgba(54, 162, 235, 0.2)",
+                    borderDash: [6, 4],
+                    yAxisID: "yTaux"
+                }, {
+                    label: "Victoire à l’extérieur (%)",
+                    data: pourcentageExterieur,
+                    borderColor: "#ff6384",
+                    backgroundColor: "rgba(255, 99, 132, 0.2)",
+                    borderDash: [6, 4],
+                    yAxisID: "yTaux"
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                scales: {
+                    yTirs: { type: "linear", position: "left", min: 8, max: 16, title: { display: true, text: "Tirs par match" } },
+                    yTaux: { type: "linear", position: "right", beginAtZero: true, max: 60, title: { display: true, text: "Victoires (%)" }, ticks: { callback: value => value + "%" }, grid: { drawOnChartArea: false } }
+                }
+            }
+        });
     </script>
 </body>
 
